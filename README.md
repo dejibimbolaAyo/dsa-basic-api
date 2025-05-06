@@ -1,6 +1,6 @@
 # Daily Quote API
 
-A simple RESTful API for managing daily quotes, built with TypeScript and native Node.js HTTP module (no external libraries).
+A simple RESTful API for managing daily quotes, built with TypeScript and native Node.js HTTP module (no external libraries), implementing a functional programming approach.
 
 ## Features
 
@@ -9,6 +9,9 @@ A simple RESTful API for managing daily quotes, built with TypeScript and native
 - JSON file-based storage (no database required)
 - No authentication/authorization required
 - Heavily commented codebase for educational purposes
+- Functional programming paradigm
+- Pure functions with minimal side effects
+- No classes or stateful objects
 
 ## API Endpoints
 
@@ -30,13 +33,22 @@ basic-api/
 │   └── quotes.json     # JSON file with quote data
 ├── src/                # TypeScript source code
 │   ├── index.ts        # Main entry point
-│   ├── server.ts       # HTTP server implementation
+│   ├── server.ts       # HTTP server and request handlers
 │   ├── fileHandler.ts  # File I/O operations
 │   └── types.ts        # TypeScript interfaces
 ├── package.json        # Project dependencies
 ├── tsconfig.json       # TypeScript configuration
 └── README.md           # Project documentation
 ```
+
+## Functional Programming Principles Applied
+
+- Pure functions with predictable outputs based on inputs
+- Avoidance of shared mutable state
+- Function composition for complex operations
+- Separation of data and behavior
+- Immutable data structures where possible
+- First-class and higher-order functions
 
 ## Getting Started
 

@@ -1,4 +1,4 @@
-import { QuoteServer } from './server';
+import { createServer } from './server';
 
 /**
  * Main entry point for the Daily Quote API
@@ -18,9 +18,8 @@ import { QuoteServer } from './server';
 // Define server port, using environment variable or default to 3000
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
-// Initialize and start the server
-const server = new QuoteServer(PORT);
-server.start();
+// Create and start the server
+createServer(PORT);
 
 console.log(`
 ==============================================
