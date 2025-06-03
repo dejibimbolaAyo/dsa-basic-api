@@ -4,6 +4,7 @@ export class CreateQuotesTable1709123456789 implements MigrationInterface {
     name = 'CreateQuotesTable1709123456789'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
+        await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`);
         await queryRunner.query(`
             CREATE TABLE "quote" (
                 "id" uuid NOT NULL DEFAULT uuid_generate_v4(),

@@ -3,9 +3,6 @@ import { createServer } from "http";
 import { AppDataSource } from "./config/database";
 import { QuoteService } from "./quoteService";
 import { handleRequest } from "./server";
-import dotenv from "dotenv";
-
-dotenv.config();
 
 /**
  * Main entry point for the Daily Quote API
@@ -19,32 +16,30 @@ dotenv.config();
  * - DELETE /quotes/:id - Delete a quote
  * 
  * No authentication or authorization is required for any endpoint.
- * Data is stored in a JSON file at ./quotes/quotes.json
  */
 
 // Define server port, using environment variable or default to 3000
-const PORT = process.env.PORT ?? 3000;
+const PORT = process.env.PORT || 3000;
 const quoteService = new QuoteService();
 
 // Initialize TypeORM connection
 AppDataSource.initialize()
     .then(() => {
         console.log("Database connection established");
+
+        // Create HTTP server
+        const server = createServer((req, res) => {
+            handleRequest(req, res, quoteService);
+        });
+
+        // Start server
+        server.listen(PORT, () => {
+            console.log(`Server is running on http://localhost:${PORT}`);
+        });
     })
     .catch((error) => {
         console.error("Error during Data Source initialization:", error);
     });
-
-
-// Create HTTP server
-const server = createServer((req, res) => {
-    handleRequest(req, res, quoteService);
-});
-
-// Start server
-server.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
 
 console.log(`
 ==============================================
@@ -61,7 +56,6 @@ PUT    /quotes/:id     - Update a quote
 DELETE /quotes/:id     - Delete a quote
 
 No authentication required.
-Data is stored in ./quotes/quotes.json
 
 Press Ctrl+C to stop the server.
 ==============================================

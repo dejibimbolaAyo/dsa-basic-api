@@ -2,11 +2,11 @@
   "name": "daily-quote-api",
   "version": "1.0.0",
   "description": "A RESTful API for managing daily quotes",
+  "type": "commonjs",
   "main": "dist/index.js",
   "scripts": {
+    "start": "ts-node src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts",
     "typeorm": "typeorm-ts-node-commonjs",
     "migration:generate": "npm run typeorm migration:generate -- -d src/config/database.ts",
     "migration:run": "npm run typeorm migration:run -- -d src/config/database.ts",
