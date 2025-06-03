@@ -1,4 +1,8 @@
-import { createServer } from './server';
+import "reflect-metadata";
+import { createServer } from "http";
+import { AppDataSource } from "./config/database";
+import { QuoteService } from "./quoteService";
+import { handleRequest } from "./server";
 
 /**
  * Main entry point for the Daily Quote API
@@ -16,10 +20,27 @@ import { createServer } from './server';
  */
 
 // Define server port, using environment variable or default to 3000
-const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
+const PORT = process.env.PORT || 3000;
+const quoteService = new QuoteService();
 
-// Create and start the server
-createServer(PORT);
+// Initialize TypeORM connection
+AppDataSource.initialize()
+    .then(() => {
+        console.log("Database connection established");
+
+        // Create HTTP server
+        const server = createServer((req, res) => {
+            handleRequest(req, res, quoteService);
+        });
+
+        // Start server
+        server.listen(PORT, () => {
+            console.log(`Server is running on http://localhost:${PORT}`);
+        });
+    })
+    .catch((error) => {
+        console.error("Error during Data Source initialization:", error);
+    });
 
 console.log(`
 ==============================================
