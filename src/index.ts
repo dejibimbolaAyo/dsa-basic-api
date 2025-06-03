@@ -30,20 +30,21 @@ const quoteService = new QuoteService();
 AppDataSource.initialize()
     .then(() => {
         console.log("Database connection established");
-
-        // Create HTTP server
-        const server = createServer((req, res) => {
-            handleRequest(req, res, quoteService);
-        });
-
-        // Start server
-        server.listen(PORT, () => {
-            console.log(`Server is running on http://localhost:${PORT}`);
-        });
     })
     .catch((error) => {
         console.error("Error during Data Source initialization:", error);
     });
+
+
+// Create HTTP server
+const server = createServer((req, res) => {
+    handleRequest(req, res, quoteService);
+});
+
+// Start server
+server.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+});
 
 console.log(`
 ==============================================
