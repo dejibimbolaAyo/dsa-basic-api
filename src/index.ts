@@ -3,6 +3,9 @@ import { createServer } from "http";
 import { AppDataSource } from "./config/database";
 import { QuoteService } from "./quoteService";
 import { handleRequest } from "./server";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * Main entry point for the Daily Quote API
@@ -20,7 +23,7 @@ import { handleRequest } from "./server";
  */
 
 // Define server port, using environment variable or default to 3000
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT ?? 3000;
 const quoteService = new QuoteService();
 
 // Initialize TypeORM connection

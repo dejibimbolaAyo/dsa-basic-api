@@ -2,6 +2,12 @@ import { AppDataSource } from "./config/database";
 import { Quote } from "./entities/Quote";
 import { Repository } from "typeorm";
 
+interface QuoteInput {
+    text: string;
+    author: string;
+    tags: string[];
+}
+
 export class QuoteService {
     private readonly quoteRepository: Repository<Quote>;
 
@@ -29,7 +35,7 @@ export class QuoteService {
         return await this.quoteRepository.save(quote);
     }
 
-    async updateQuote(id: string, quoteData: Partial<Quote>): Promise<Quote | null> {
+    async updateQuote(id: string, quoteData: Partial<QuoteInput>): Promise<Quote | null> {
         const quote = await this.quoteRepository.findOneBy({ id });
         if (!quote) return null;
 
@@ -39,6 +45,6 @@ export class QuoteService {
 
     async deleteQuote(id: string): Promise<boolean> {
         const result = await this.quoteRepository.delete(id);
-        return result.affected !== undefined && result.affected !== null && result.affected > 0;
+        return (result.affected ?? 0) > 0;
     }
 } 
