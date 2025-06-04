@@ -1,12 +1,15 @@
 # Daily Quote API
 
-A simple RESTful API for managing daily quotes, built with TypeScript, Node.js, and PostgreSQL using TypeORM.
+A simple RESTful API for managing daily quotes, built with TypeScript, Node.js, Express.js, and PostgreSQL using TypeORM.
 
 ## Features
 
 - Full CRUD operations (Create, Read, Update, Delete)
 - Support for all HTTP verbs (GET, POST, PUT, DELETE)
 - PostgreSQL database with TypeORM
+- Express.js for routing and middleware
+- Built-in JSON body parsing
+- CORS support
 - No authentication/authorization required
 - Heavily commented codebase for educational purposes
 - Functional programming paradigm
@@ -35,8 +38,8 @@ basic-api/
 │   ├── entities/       # TypeORM entities
 │   │   └── Quote.ts    # Quote entity definition
 │   ├── index.ts        # Main entry point
-│   ├── server.ts       # HTTP server and request handlers
-│   └── fileHandler.ts  # Database operations handler
+│   ├── server.ts       # Express server and route handlers
+│   └── quoteService.ts # Database operations handler
 ├── package.json        # Project dependencies
 ├── tsconfig.json       # TypeScript configuration
 └── README.md           # Project documentation
@@ -202,21 +205,51 @@ The project follows a modular architecture with clear separation of concerns:
 3. **Main Entry Point (`index.ts`)**
 
    - Initializes database connection
-   - Sets up HTTP server
+   - Sets up Express server
    - Handles application startup
 
 4. **Server Module (`server.ts`)**
 
-   - Handles HTTP requests
-   - Routes requests to appropriate handlers
-   - Manages response formatting
+   - Express.js server configuration
+   - Route handlers and middleware
+   - Error handling and response formatting
+   - CORS configuration
 
-5. **Quote Handler (`fileHandler.ts`)**
+5. **Quote Service (`quoteService.ts`)**
    - Implements database operations
    - Handles CRUD operations
    - Manages data persistence
 
 ### Key Components
+
+#### Express Server Setup
+
+```typescript
+export const createServer = (quoteService: QuoteService) => {
+  const app = express();
+  app.use(express.json());
+
+  // CORS middleware
+  app.use((req: Request, res: Response, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, DELETE, OPTIONS"
+    );
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    next();
+  });
+
+  // Route handlers
+  app.get("/quotes", async (req: Request, res: Response) => {
+    // Handler implementation
+  });
+
+  // ... other routes ...
+
+  return app;
+};
+```
 
 #### Quote Entity
 

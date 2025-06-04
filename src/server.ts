@@ -1,119 +1,160 @@
-import { IncomingMessage, ServerResponse } from "http";
+import express, { Request, Response } from 'express';
 import { QuoteService } from "./quoteService";
 
-const sendResponse = (res: ServerResponse, statusCode: number, message: string, data?: any, error?: string) => {
-    res.writeHead(statusCode);
-    res.end(JSON.stringify({ statusCode, message, data, error }));
-};
+export const createServer = (quoteService: QuoteService) => {
+    const app = express();
+    app.use(express.json());
 
-const parseRequestBody = (req: IncomingMessage): Promise<any> => {
-    return new Promise((resolve, reject) => {
-        let body = "";
-        req.on("data", chunk => body += chunk.toString());
-        req.on("end", () => {
-            try {
-                resolve(JSON.parse(body));
-            } catch (error) {
-                reject(error);
+    // CORS middleware
+    app.use((req: Request, res: Response, next) => {
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+        next();
+    });
+
+    // GET all quotes
+    app.get('/quotes', async (req: Request, res: Response) => {
+        try {
+            const quotes = await quoteService.getAllQuotes();
+            res.status(200).json({
+                statusCode: 200,
+                message: "Quotes retrieved successfully",
+                data: quotes
+            });
+        } catch (error) {
+            res.status(500).json({
+                statusCode: 500,
+                message: "Internal server error",
+                error: error instanceof Error ? error.message : "Unknown error"
+            });
+        }
+    });
+
+    // POST new quote
+    app.post('/quotes', async (req: Request, res: Response) => {
+        try {
+            const newQuote = await quoteService.createQuote(req.body);
+            res.status(201).json({
+                statusCode: 201,
+                message: "Quote created successfully",
+                data: newQuote
+            });
+        } catch (error) {
+            res.status(400).json({
+                statusCode: 400,
+                message: "Invalid request body",
+                error: error instanceof Error ? error.message : "Unknown error"
+            });
+        }
+    });
+
+    // GET random quote
+    app.get('/quotes/random', async (req: Request, res: Response) => {
+        try {
+            const quote = await quoteService.getRandomQuote();
+            if (quote) {
+                res.status(200).json({
+                    statusCode: 200,
+                    message: "Random quote retrieved successfully",
+                    data: quote
+                });
+            } else {
+                res.status(404).json({
+                    statusCode: 404,
+                    message: "No quotes available"
+                });
             }
+        } catch (error) {
+            res.status(500).json({
+                statusCode: 500,
+                message: "Internal server error",
+                error: error instanceof Error ? error.message : "Unknown error"
+            });
+        }
+    });
+
+    // GET quote by ID
+    app.get('/quotes/:id', async (req: Request, res: Response) => {
+        try {
+            const quote = await quoteService.getQuoteById(req.params.id);
+            if (quote) {
+                res.status(200).json({
+                    statusCode: 200,
+                    message: "Quote retrieved successfully",
+                    data: quote
+                });
+            } else {
+                res.status(404).json({
+                    statusCode: 404,
+                    message: "Quote not found"
+                });
+            }
+        } catch (error) {
+            res.status(500).json({
+                statusCode: 500,
+                message: "Internal server error",
+                error: error instanceof Error ? error.message : "Unknown error"
+            });
+        }
+    });
+
+    // PUT update quote
+    app.put('/quotes/:id', async (req: Request, res: Response) => {
+        try {
+            const updatedQuote = await quoteService.updateQuote(req.params.id, req.body);
+            if (updatedQuote) {
+                res.status(200).json({
+                    statusCode: 200,
+                    message: "Quote updated successfully",
+                    data: updatedQuote
+                });
+            } else {
+                res.status(404).json({
+                    statusCode: 404,
+                    message: "Quote not found"
+                });
+            }
+        } catch (error) {
+            res.status(400).json({
+                statusCode: 400,
+                message: "Invalid request body",
+                error: error instanceof Error ? error.message : "Unknown error"
+            });
+        }
+    });
+
+    // DELETE quote
+    app.delete('/quotes/:id', async (req: Request, res: Response) => {
+        try {
+            const success = await quoteService.deleteQuote(req.params.id);
+            if (success) {
+                res.status(200).json({
+                    statusCode: 200,
+                    message: "Quote deleted successfully"
+                });
+            } else {
+                res.status(404).json({
+                    statusCode: 404,
+                    message: "Quote not found"
+                });
+            }
+        } catch (error) {
+            res.status(500).json({
+                statusCode: 500,
+                message: "Internal server error",
+                error: error instanceof Error ? error.message : "Unknown error"
+            });
+        }
+    });
+
+    // Handle 404 routes
+    app.use((req: Request, res: Response) => {
+        res.status(404).json({
+            statusCode: 404,
+            message: "Route not found"
         });
     });
-};
 
-const handleGetQuotes = async (res: ServerResponse, quoteService: QuoteService) => {
-    const quotes = await quoteService.getAllQuotes();
-    sendResponse(res, 200, "Quotes retrieved successfully", quotes);
-};
-
-const handleCreateQuote = async (req: IncomingMessage, res: ServerResponse, quoteService: QuoteService) => {
-    try {
-        const quoteData = await parseRequestBody(req);
-        const newQuote = await quoteService.createQuote(quoteData);
-        sendResponse(res, 201, "Quote created successfully", newQuote);
-    } catch (error) {
-        sendResponse(res, 400, "Invalid request body", null, error instanceof Error ? error.message : "Unknown error");
-    }
-};
-
-const handleGetRandomQuote = async (res: ServerResponse, quoteService: QuoteService) => {
-    const quote = await quoteService.getRandomQuote();
-    if (quote) {
-        sendResponse(res, 200, "Random quote retrieved successfully", quote);
-    } else {
-        sendResponse(res, 404, "No quotes available");
-    }
-};
-
-const handleGetQuoteById = async (res: ServerResponse, quoteService: QuoteService, id: string) => {
-    const quote = await quoteService.getQuoteById(id);
-    if (quote) {
-        sendResponse(res, 200, "Quote retrieved successfully", quote);
-    } else {
-        sendResponse(res, 404, "Quote not found");
-    }
-};
-
-const handleUpdateQuote = async (req: IncomingMessage, res: ServerResponse, quoteService: QuoteService, id: string) => {
-    try {
-        const quoteData = await parseRequestBody(req);
-        const updatedQuote = await quoteService.updateQuote(id, quoteData);
-        if (updatedQuote) {
-            sendResponse(res, 200, "Quote updated successfully", updatedQuote);
-        } else {
-            sendResponse(res, 404, "Quote not found");
-        }
-    } catch (error) {
-        sendResponse(res, 400, "Invalid request body", null, error instanceof Error ? error.message : "Unknown error");
-    }
-};
-
-const handleDeleteQuote = async (res: ServerResponse, quoteService: QuoteService, id: string) => {
-    const success = await quoteService.deleteQuote(id);
-    if (success) {
-        sendResponse(res, 200, "Quote deleted successfully");
-    } else {
-        sendResponse(res, 404, "Quote not found");
-    }
-};
-
-export const handleRequest = async (
-    req: IncomingMessage,
-    res: ServerResponse,
-    quoteService: QuoteService
-) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-    res.setHeader("Content-Type", "application/json");
-
-    if (req.method === "OPTIONS") {
-        res.writeHead(204);
-        res.end();
-        return;
-    }
-
-    try {
-        const url = new URL(req.url || "", `http://${req.headers.host}`);
-        const path = url.pathname;
-        const id = path.split("/")[2];
-
-        if (path === "/quotes") {
-            if (req.method === "GET") await handleGetQuotes(res, quoteService);
-            else if (req.method === "POST") await handleCreateQuote(req, res, quoteService);
-        } else if (path === "/quotes/random" && req.method === "GET") {
-            await handleGetRandomQuote(res, quoteService);
-        } else if (path.match(/^\/quotes\/[^/]+$/)) {
-            if (!id) {
-                sendResponse(res, 400, "Invalid quote ID");
-                return;
-            }
-            if (req.method === "GET") await handleGetQuoteById(res, quoteService, id);
-            else if (req.method === "PUT") await handleUpdateQuote(req, res, quoteService, id);
-            else if (req.method === "DELETE") await handleDeleteQuote(res, quoteService, id);
-        } else {
-            sendResponse(res, 404, "Route not found");
-        }
-    } catch (error) {
-        sendResponse(res, 500, "Internal server error", null, error instanceof Error ? error.message : "Unknown error");
-    }
+    return app;
 }; 
