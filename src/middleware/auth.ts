@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { UserService } from "../userService";
 import { UserRole } from "../entities/User";
+import dotenv from "dotenv";
+dotenv.config();
 
 export interface AuthRequest extends Request {
     user?: {
