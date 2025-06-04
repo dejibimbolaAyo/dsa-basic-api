@@ -1,8 +1,7 @@
 import "reflect-metadata";
-import { createServer } from "http";
 import { AppDataSource } from "./config/database";
 import { QuoteService } from "./quoteService";
-import { handleRequest } from "./server";
+import { createServer } from "./server";
 
 /**
  * Main entry point for the Daily Quote API
@@ -27,13 +26,11 @@ AppDataSource.initialize()
     .then(() => {
         console.log("Database connection established");
 
-        // Create HTTP server
-        const server = createServer((req, res) => {
-            handleRequest(req, res, quoteService);
-        });
+        // Create Express app
+        const app = createServer(quoteService);
 
         // Start server
-        server.listen(PORT, () => {
+        app.listen(PORT, () => {
             console.log(`Server is running on http://localhost:${PORT}`);
         });
     })
